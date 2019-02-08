@@ -6,12 +6,17 @@ import OpenGLRenderer from './rendering/gl/OpenGLRenderer';
 import Camera from './Camera';
 import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
+import {mat4} from 'gl-matrix';
+var CameraControls = require('3d-view-controls');
 
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
   tesselations: 5,
   'Load Scene': loadScene, // A function pointer, essentially
+  cameraStatus: 'Follow Rocket',
+  rocketThrust: 1.0,
+  rocketFins: 3
 };
 
 let square: Square;
@@ -47,6 +52,9 @@ function main() {
 
   // Add controls to the gui
   const gui = new DAT.GUI();
+ gui.add(controls, 'cameraStatus', ['Follow Rocket', 'User Controlled']);
+ gui.add(controls, 'rocketThrust', 1.0, 5.0);
+ gui.add(controls, 'rocketFins', 2, 8).step(1);
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -61,7 +69,7 @@ function main() {
   // Initial call to load scene
   loadScene();
 
-  const camera = new Camera(vec3.fromValues(0, 1010, -10), vec3.fromValues(0, 1010, 0));
+  let camera: Camera = new Camera(vec3.fromValues(10, 1010, 0), vec3.fromValues(0, 1010, 0));
 
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(164.0 / 255.0, 233.0 / 255.0, 1.0, 1);
@@ -83,10 +91,19 @@ function main() {
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
     processKeyPresses();
+    if (!controls.cameraStatus.localeCompare("Follow Rocket")) {
+      let planetRadius: number = 1000.0;
+      let rocketPosition: vec3 = vec3.fromValues(0.0, (planetRadius + 10.0) * Math.cos(time * 3.14159 * 0.001), (planetRadius + 10.0) * Math.sin(time * 3.14159 * 0.001));
+      let cameraPosition: vec3 = vec3.fromValues(0.0, (planetRadius + 20.0) * Math.cos((time - 0.25) * 3.14159 * 0.001), (planetRadius + 20.0) * Math.sin((time - 0.25) * 3.14159 * 0.001));
+      camera.controls.eye = rocketPosition;
+      camera.controls.center = cameraPosition;
+    }
+    flat.setThrust(controls.rocketThrust);
+    flat.setFins(controls.rocketFins);
     renderer.render(camera, flat, [
       square,
     ], time);
-    time++;
+    time += controls.rocketThrust;
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame

@@ -1,89 +1,36 @@
 # CIS 566 Homework 2: Implicit Surfaces
+_Wei (Waley) Zhang (PennKey: wzha)_
+[github.io Demo](https://greedyai.github.io/noisy-terrain/)
+_Note: Please run the demo in a mediumly-small sized window. The sheer size of the objects in my project has the unfortunate side effect of dragging down the frame rate significantly when the screen size is large._
 
-## Objective
-- Gain experience with signed distance functions
-- Experiment with animation curves
+## Features
+- __Ray marching.__ Using camera attributes such as its position, its reference vector, its up vector, and its field of view, I cast a ray through every fragment and compute whether that ray intersects with a scene object using the scene's signed distance field (SDF), and if so, calculate where that intersection point is and which scene object I collided with. I only march rays out to a distance of 100 units from the camera. Beyond 100 units, everything is assumed to be part of the background. I also optimized the ray marching algorithm by doing the following:
+  - Sphere tracing: at every step, I march forward by the distance that the scene SDF told me was "safe" to march during the last step.
+  - Bounding volume hierarchy: my scene is organized as follows: the top level bounding box contains all objects in my scene; at the second level, the rocket and its exhaust flames share a bounding box, and the planet and its low-orbit asteroids also share a bounding box. Since the rocket and its exhaust flames are always together, anthe planet and its low-orbit asteroids are very close to each other, I found little benefit to add another level to my bounding volume hierarchy. Whenever I cast a ray, I ignore the signed distance fields of objects whose bounding boxes the ray will never intersect, while progressing down the hierarchy recursively.
 
-## Base Code
-The code we have provided for this assignment features the following:
-- A square that spans the range [-1, 1] in X and Y that is rendered with a
-shader that does not apply a projection matrix to it, thus rendering it as the
-entirety of your screen
-- TypeScript code just like the code in homework 1 to set up a WebGL framework
-- Code that passes certain camera attributes (listed in the next section),
-the screen dimensions, and a time counter to the shader program.
+- __Various SDFs.__ My scene contains the following objects (and their associated SDFs):
+  - Rocket: my rocket contains a body, a nose, a nozzle, and fins. The nozzle was created using the Subtraction SDF operation on two capped cones. The fins are essentially triangular prisms (with an arbitrary triangular face), so I had to write a custom "primitive" for computing their SDF. the fins, nose, and nozzle are attached to the rocket body using the Smooth Blend SDF operation.
+  - Rocket exhaust: I also simulated flames coming out of the nozzle of the rocket using SDFs. The flames were essentially a Smooth Blend of an series of ellipsoids that decrease in size the further they are from the nozzle.
+  - Planet: a large spherical planet was also created.
+  - Asteroids: I manually created 20 asteroids around the equator of the planet. Each asteroid was created using the Intersection SDF operation on a displaced rectangular prism and an ellipsoid. The rectangular prism was displaced using a combination of sine and cosine functions to create realistic-looking craters on the asteroids.
 
-## Assignment Requirements
-- __(10 points)__ Modify the provided `flat-frag.glsl` to cast rays from a
-virtual camera. We have set up uniform variables in your shader that take in
-the eye position, reference point position, and up vector of the `Camera` in
-the provided TypeScript code, along with a uniform that stores the screen width
-and height. Using these uniform variables, and only these uniform variables,
-you must write a function that uses the NDC coordinates of the current fragment
-(i.e. its fs_Pos value) and projects a ray from that pixel. Refer to the [slides
-on ray casting](https://docs.google.com/presentation/d/e/2PACX-1vSN5ntJISgdOXOSNyoHimSVKblnPnL-Nywd6aRPI-XPucX9CeqzIEGTjFTwvmjYUgCglTqgvyP1CpxZ/pub?start=false&loop=false&delayms=60000&slide=id.g27215b64c6_0_107)
-from CIS 560 for reference on how to cast a ray without an explicit
-view-projection matrix. You'll have to compute your camera's Right vector based
-on the provided Up vector, Eye point, and Ref point. You can test your ray
-casting function by converting your ray directions to colors using the formula
-`color = 0.5 * (dir + vec3(1.0, 1.0, 1.0))`. If your screen looks like the
-following image, your rays are being cast correctly:
-![](rayDir.png)
-- __(70 points)__ Create and animate a scene using signed distance functions.
-The subject of your scene can be anything you like, provided your scene includes
-the following elements:
-  - The SDF combination operations Intersection, Subtraction, and Smooth Blend
-  - Raymarch optimization by way of bounding volumes around SDFs, arranged in
-  a Bounding Volume Hierarchy
-  - Animation of at least two scene attributes such as color, position, scale,
-  twist, rotation, texture, or anything else you can think of
-  - At least two functions mentioned in the Toolbox Functions slides used for
-  animation
-  - Procedural texturing using toolbox functions and/or noise functions
-  - Shading that involves surface normal computation
+- __Animations.__ I animated the following scene attributes:
+  - Rocket position and rotation: the rocket travels in a circular orbit around the planet while rotating clockwise when looked at from its rear. The rocket is tangent to the surface of the planet at all times. Trigonometric functions were used to do this animation.
+  - Rocket exhaust: the rocket exhaust oscillates regularly behind the rocket and varies in length depending on the speed of the rocket (a variable that the user can change via dat.GUI). The oscillation is controlled using a triangle wave. The exhaust's texture is also animated. At any given time, the composition of white and yellow in the exhaust flames is determined using a fractal brownian motion (FBM) with a standard noise function with quintic falloff for interpolation.
 
-- __(10 points)__ Add GUI elements via dat.GUI that allow the user to modify at
-least two different attributes of your scene.
+- __Procedural texturing and shading using surface normals.__ The objects in my scene are textured as follows:
+  - Rocket: the texture of the entire rocket is computed using a fractal brownian motion (FBM) with a standard noise function with quintic falloff for interpolation. However, to differentiate between different parts of the rocket (fins, body, nose, nozzle), the inputs to the noise function differs. For example, the input to the noise function for the nose cone and the fins was computed radially, whereas the input to the noise function for the body and nozzle are computed normally. A different mixture of colors is also used for each rocket part to further differentiate them.
+  - Rocket exhaust: described above in teh animations section.
+  - Planet: the texture of the planet was computed using summed FBM with a worley noise function clamped to fixed maximum value. To shrink the 3D space down to the 2D worley noise algorithm, I computed values similar to the spherical angles (_but not exactly the spherical angles_) for each point on the surface of the planet, and inputted those values into the worley noise function. The resulting noise value was divided between water and land based on a hard threshold.
+  - Asteroid: the texture of the asteroid was computed similarly to that of the planet: summed FBM with worley noise inputted with "spherical" angles. However, I also transformed the resulting noise via a bias function with base 0.7 to achieve fast texture transitions on the asteroids.
+  - Lighting: the lighting in the scene is computed using the Blinn-Phong reflection model, which combines Lambertian shading, specular highlights, and ambient light. There is a point source of light (aka the "sun") shining towards one hemisphere of the planet. To compute Blinn-Phong lighting, the normal at each surface point in my scene was estimated using an approximated gradient. The background is black, resembling that of empty space.
 
-- __(10 points)__ Following the specifications listed
-[here](https://github.com/pjcozzi/Articles/blob/master/CIS565/GitHubRepo/README.md),
-create your own README.md, renaming this file to INSTRUCTIONS.md. Don't worry
-about discussing runtime optimization for this project. Make sure your
-README contains the following information:
-  - Your name and PennKey
-  - Citation of any external resources you found helpful when implementing this
-  assignment.
-  - A link to your live github.io demo (refer to the pinned Piazza post on
-    how to make a live demo through github.io)
-  - An explanation of the techniques you used to generate your planet features.
-  Please be as detailed as you can; not only will this help you explain your work
-  to recruiters, but it helps us understand your project when we grade it!
+- __User controls via dat.GUI.__ The user can control three features in my scene. First of all, they can select to fix the camera behind the rocket so that they don't have to scroll the camera every time the rocket leaves the screen as its orbits the planet. Of course, the user can unfix the camera at any point if he/she wishes to explore the scene independently. Secondly, they can change the thrust of the rocket. Increasing the thrust of the rocket increases its orbital speed and rotation speed, and the rocket exhaust flames will grow larger/longer to show this effect as well. Finally, they can change the number of fins on the rocket to any whole number between 2 and 8 inclusive.
 
-## Useful Links
-- [IQ's Article on SDFs](http://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm)
-- [IQ's Article on Smooth Blending](http://www.iquilezles.org/www/articles/smin/smin.htm)
-- [IQ's Article on Useful Functions](http://www.iquilezles.org/www/articles/functions/functions.htm)
-- [Breakdown of Rendering an SDF Scene](http://www.iquilezles.org/www/material/nvscene2008/rwwtt.pdf)
+## Screenshots
+![Without lighting (ie. just the material base colors)](img/without_lighting.PNG)
+![With Bling-Phong shading (notice the shadows/specular highlights on the asteroid and the rocket)](img/with_lighting.PNG)
+![With shading, at nighttime, with max thrust and 8 fins](img/fins_speed.PNG)
 
-
-## Submission
-Commit and push to Github, then submit a link to your commit on Canvas. Remember
-to make your own README!
-
-## Inspiration
-- [Alien Corridor](https://www.shadertoy.com/view/4slyRs)
-- [The Evolution of Motion](https://www.shadertoy.com/view/XlfGzH)
-- [Fractal Land](https://www.shadertoy.com/view/XsBXWt)
-- [Voxel Edges](https://www.shadertoy.com/view/4dfGzs)
-- [Snail](https://www.shadertoy.com/view/ld3Gz2)
-- [Cubescape](https://www.shadertoy.com/view/Msl3Rr)
-- [Journey Tribute](https://www.shadertoy.com/view/ldlcRf)
-- [Stormy Landscape](https://www.shadertoy.com/view/4ts3z2)
-- [Generators](https://www.shadertoy.com/view/Xtf3Rn)
-
-## Extra Credit (20 points maximum)
-- __(5 - 20 pts)__ Do some research into more advanced shading techniques such
-as ambient occlusion, soft shadows, GGX materials, depth of field, volumetrics,
-etc. and implement one of them. The more complex your feature, the more points
-you'll earn.
-- __(? pts)__ Propose an extra feature of your own!
+## Citation
+I used various primitive SDF implementations from Inigo Quilez's website [here](http://iquilezles.org/www/articles/distfunctions/distfunctions.htm), as well as the corresponding Shadertoy [here](https://www.shadertoy.com/view/Xds3zN).
