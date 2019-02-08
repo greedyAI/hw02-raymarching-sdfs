@@ -1,7 +1,7 @@
 # CIS 566 Homework 2: Implicit Surfaces
 _Wei (Waley) Zhang (PennKey: wzha)_
 
-[github.io Demo](https://greedyai.github.io/noisy-terrain/)
+[github.io Demo](https://greedyai.github.io/raymarching-sdfs/)
 
 _Note: Please run the demo in a medium-small sized window. The sheer size of the objects in my project has the unfortunate side effect of dragging down the frame rate significantly when the screen size is large._
 
