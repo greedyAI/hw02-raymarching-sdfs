@@ -32,10 +32,10 @@ _Note: Please run the demo in a mediumly-small sized window. The sheer size of t
 ## Screenshots
 ![](img/without_lighting.PNG)
 <p align="center">Without lighting (ie. just the material base colors)</p>
-<br></br>
+<br/>
 ![](img/with_lighting.PNG)
 <p align="center">With Bling-Phong shading (notice the shadows/specular highlights on the asteroid and the rocket)</p>
-<br></br>
+<br/>
 ![](img/fins_speed.PNG)
 <p align="center">With shading, at nighttime, with max thrust and 8 fins</p>
 
