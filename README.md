@@ -30,11 +30,13 @@ _Note: Please run the demo in a mediumly-small sized window. The sheer size of t
 - __User controls via dat.GUI.__ The user can control three features in my scene. First of all, they can select to fix the camera behind the rocket so that they don't have to scroll the camera every time the rocket leaves the screen as its orbits the planet. Of course, the user can unfix the camera at any point if he/she wishes to explore the scene independently. Secondly, they can change the thrust of the rocket. Increasing the thrust of the rocket increases its orbital speed and rotation speed, and the rocket exhaust flames will grow larger/longer to show this effect as well. Finally, they can change the number of fins on the rocket to any whole number between 2 and 8 inclusive.
 
 ## Screenshots
-<p align="center">![](img/without_lighting.PNG)
-Without lighting (ie. just the material base colors)</p>
+![](img/without_lighting.PNG)
+<p align="center">Without lighting (ie. just the material base colors)</p>
+
 
 ![](img/with_lighting.PNG)
 <p align="center">With Bling-Phong shading (notice the shadows/specular highlights on the asteroid and the rocket)</p>
+
 
 ![](img/fins_speed.PNG)
 <p align="center">With shading, at nighttime, with max thrust and 8 fins</p>
