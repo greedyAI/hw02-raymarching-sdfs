@@ -22,7 +22,7 @@ _Note: Please run the demo in a mediumly-small sized window. The sheer size of t
 
 - __Procedural texturing and shading using surface normals.__ The objects in my scene are textured as follows:
   - Rocket: the texture of the entire rocket is computed using a fractal brownian motion (FBM) with a standard noise function with quintic falloff for interpolation. However, to differentiate between different parts of the rocket (fins, body, nose, nozzle), the inputs to the noise function differs. For example, the input to the noise function for the nose cone and the fins was computed radially, whereas the input to the noise function for the body and nozzle are computed normally. A different mixture of colors is also used for each rocket part to further differentiate them.
-  - Rocket exhaust: described above in teh animations section.
+  - Rocket exhaust: described above in the animations section.
   - Planet: the texture of the planet was computed using summed FBM with a worley noise function clamped to fixed maximum value. To shrink the 3D space down to the 2D worley noise algorithm, I computed values similar to the spherical angles (_but not exactly the spherical angles_) for each point on the surface of the planet, and inputted those values into the worley noise function. The resulting noise value was divided between water and land based on a hard threshold.
   - Asteroid: the texture of the asteroid was computed similarly to that of the planet: summed FBM with worley noise inputted with "spherical" angles. However, I also transformed the resulting noise via a bias function with base 0.7 to achieve fast texture transitions on the asteroids.
   - Lighting: the lighting in the scene is computed using the Blinn-Phong reflection model, which combines Lambertian shading, specular highlights, and ambient light. There is a point source of light (aka the "sun") shining towards one hemisphere of the planet. To compute Blinn-Phong lighting, the normal at each surface point in my scene was estimated using an approximated gradient. The background is black, resembling that of empty space.
@@ -32,12 +32,10 @@ _Note: Please run the demo in a mediumly-small sized window. The sheer size of t
 ## Screenshots
 ![](img/without_lighting.PNG)
 <p align="center">Without lighting (ie. just the material base colors)</p>
-
-
+<br>
 ![](img/with_lighting.PNG)
 <p align="center">With Bling-Phong shading (notice the shadows/specular highlights on the asteroid and the rocket)</p>
-
-
+<br>
 ![](img/fins_speed.PNG)
 <p align="center">With shading, at nighttime, with max thrust and 8 fins</p>
 
