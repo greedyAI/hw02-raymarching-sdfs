@@ -3,16 +3,16 @@ _Wei (Waley) Zhang (PennKey: wzha)_
 
 [github.io Demo](https://greedyai.github.io/noisy-terrain/)
 
-_Note: Please run the demo in a mediumly-small sized window. The sheer size of the objects in my project has the unfortunate side effect of dragging down the frame rate significantly when the screen size is large._
+_Note: Please run the demo in a medium-small sized window. The sheer size of the objects in my project has the unfortunate side effect of dragging down the frame rate significantly when the screen size is large._
 
 ## Features
 - __Ray marching.__ Using camera attributes such as its position, its reference vector, its up vector, and its field of view, I cast a ray through every fragment and compute whether that ray intersects with a scene object using the scene's signed distance field (SDF), and if so, calculate where that intersection point is and which scene object I collided with. I only march rays out to a distance of 100 units from the camera. Beyond 100 units, everything is assumed to be part of the background. I also optimized the ray marching algorithm by doing the following:
   - Sphere tracing: at every step, I march forward by the distance that the scene SDF told me was "safe" to march during the last step.
-  - Bounding volume hierarchy: my scene is organized as follows: the top level bounding box contains all objects in my scene; at the second level, the rocket and its exhaust flames share a bounding box, and the planet and its low-orbit asteroids also share a bounding box. Since the rocket and its exhaust flames are always together, anthe planet and its low-orbit asteroids are very close to each other, I found little benefit to add another level to my bounding volume hierarchy. Whenever I cast a ray, I ignore the signed distance fields of objects whose bounding boxes the ray will never intersect, while progressing down the hierarchy recursively.
+  - Bounding volume hierarchy: my scene is organized as follows: the top level bounding box contains all objects in my scene; at the second level, the rocket and its exhaust flames share a bounding box, and the planet and its low-orbit asteroids also share a bounding box. Since the rocket and its exhaust flames are always together, and the planet and its low-orbit asteroids are very close to each other, I found little benefit to add another level to my bounding volume hierarchy. Whenever I cast a ray, I ignore the signed distance fields of objects whose bounding boxes the ray will never intersect, while progressing down the hierarchy recursively.
 
 - __Various SDFs.__ My scene contains the following objects (and their associated SDFs):
   - Rocket: my rocket contains a body, a nose, a nozzle, and fins. The nozzle was created using the Subtraction SDF operation on two capped cones. The fins are essentially triangular prisms (with an arbitrary triangular face), so I had to write a custom "primitive" for computing their SDF. the fins, nose, and nozzle are attached to the rocket body using the Smooth Blend SDF operation.
-  - Rocket exhaust: I also simulated flames coming out of the nozzle of the rocket using SDFs. The flames were essentially a Smooth Blend of an series of ellipsoids that decrease in size the further they are from the nozzle.
+  - Rocket exhaust: I also simulated flames coming out of the nozzle of the rocket using SDFs. The flames were essentially a Smooth Blend of a series of ellipsoids that decrease in size the further they are from the nozzle.
   - Planet: a large spherical planet was also created.
   - Asteroids: I manually created 20 asteroids around the equator of the planet. Each asteroid was created using the Intersection SDF operation on a displaced rectangular prism and an ellipsoid. The rectangular prism was displaced using a combination of sine and cosine functions to create realistic-looking craters on the asteroids.
 
