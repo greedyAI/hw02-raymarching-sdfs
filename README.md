@@ -1,6 +1,8 @@
 # CIS 566 Homework 2: Implicit Surfaces
 _Wei (Waley) Zhang (PennKey: wzha)_
+
 [github.io Demo](https://greedyai.github.io/noisy-terrain/)
+
 _Note: Please run the demo in a mediumly-small sized window. The sheer size of the objects in my project has the unfortunate side effect of dragging down the frame rate significantly when the screen size is large._
 
 ## Features
