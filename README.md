@@ -1,4 +1,6 @@
-# CIS 566 Homework 2: Implicit Surfaces
+# Implicit Surfaces
+_Created for CIS 566 Homework 2 in Spring 2019_
+
 _Wei (Waley) Zhang (PennKey: wzha)_
 
 [github.io Demo](https://greedyai.github.io/raymarching-sdfs/)
